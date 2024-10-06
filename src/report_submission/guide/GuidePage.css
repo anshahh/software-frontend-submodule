@@ -1,0 +1,68 @@
+
+.guide-container {
+    background-image: linear-gradient(to bottom, var(--chakra-colors-blue-100), var(--chakra-colors-purple-100));
+    width: 80%; 
+    max-width: 900px; 
+    margin: 20px auto; 
+    text-align: center; 
+    padding: 20px;
+}
+
+
+.guide-heading {
+    font-size: 2.5em; 
+    font-weight: bold; 
+    color: #3182ce; 
+    margin: 20px 0px;
+    text-align: center;
+}
+
+.submissions-list {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    margin-top: 20px;
+}
+
+
+.submission-item {
+    background-color: #3182ce; 
+    color: white; 
+    padding: 12px 20px; 
+    border-radius: 8px; 
+    border: none; 
+    font-size: 1.2em; 
+    font-weight: bold; 
+    text-align: center; 
+    text-decoration: none; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease; 
+    width: 300px;
+}
+
+
+.submission-wrapper {
+    margin: 15px 0px; 
+}
+
+
+.submission-item:hover {
+    background-color: #0056b3; 
+}
+
+
+@media (max-width: 600px) {
+    .guide-heading {
+        font-size: 2em; 
+    }
+
+    .submission-item {
+        font-size: 1em; 
+        padding: 10px 15px; 
+        width: 100%; 
+    }
+}
+
+
+
+
