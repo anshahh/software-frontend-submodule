@@ -16,6 +16,7 @@ import Guide from './components/Guide'
 import Examiner from './components/Examiner'
 import Student from './components/Student'
 import StudentStatus from './components/StudentStatus'
+import TwoFactorAuthentication from './components/2FactorAuth'
 
 function App() {
   const {adminUser,setAdminUser} = useAdminContext();
@@ -31,6 +32,7 @@ function App() {
       {adminUser ? <Navbar user={user}/> : <></>}
     <Routes>
       <Route path='/' element={adminUser ? <Home /> : <Navigate to= '/login'/>}></Route>
+      <Route path='/2fa' element={adminUser ? <Navigate to='/' />:<TwoFactorAuthentication />}></Route>
       <Route path='/login' element={adminUser ? <Navigate to='/' />:<Login />}></Route>
       <Route path='/signup' element={adminUser ? <Navigate to='/' />:<Signup />}></Route>
       <Route path='/btech-guide-allotment' element={adminUser ? <GuideAllocationPage /> : <Login />}></Route>

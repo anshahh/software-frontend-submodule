@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChakraProvider, Box, Container, SimpleGrid, VStack, Heading, Text, Card, CardHeader, CardBody } from '@chakra-ui/react';
 import { extendTheme, ColorModeScript } from '@chakra-ui/react';
-import Navbar from './Navbar';  // Import the Navbar component
+//import Navbar from './Navbar';  // Import the Navbar component
 import { useAdminContext } from '../context/AdminContext';
 
 // 1. Extend the Chakra theme to set up a dark mode

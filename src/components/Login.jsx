@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Box, Button, FormControl, FormLabel, Input, Heading, Text, Stack, Alert, AlertIcon, AlertDescription, Image } from "@chakra-ui/react";
+import { Box, Button, FormControl, FormLabel, Input, Heading, Text, Stack, Alert, AlertIcon, AlertDescription, Image, ButtonGroup } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAdminContext } from '../context/AdminContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [userType, setUserType] = useState(null); // New state for user type
   let navigate = useNavigate();
   const { adminUser, setAdminUser } = useAdminContext();
 
@@ -23,10 +24,9 @@ export default function LoginPage() {
     e.preventDefault();
     if (validateEmail(email)) {
       // Proceed with login logic
-      console.log("Login attempt with:", email);
-      if (email.startsWith("faculty@")) setAdminUser("faculty");
-      else setAdminUser("student");
-      // navigate('/');
+      console.log("Login attempt with:", email, userType);
+      //setAdminUser(userType); // Set user type in context
+      navigate('/2fa');
     }
   };
 
@@ -57,6 +57,27 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           <Stack spacing={4}>
+            {/* User Type Selection */}
+            <Box textAlign="center">
+              <FormLabel>Select Your Role</FormLabel>
+              <ButtonGroup isAttached>
+                <Button
+                  colorScheme={userType === "faculty" ? "blue" : "gray"}
+                  onClick={() => setUserType("faculty")}
+                  variant={userType === "faculty" ? "solid" : "outline"}
+                >
+                  Faculty
+                </Button>
+                <Button
+                  colorScheme={userType === "student" ? "blue" : "gray"}
+                  onClick={() => setUserType("student")}
+                  variant={userType === "student" ? "solid" : "outline"}
+                >
+                  Student
+                </Button>
+              </ButtonGroup>
+            </Box>
+
             <FormControl isRequired>
               <FormLabel htmlFor="email">Email</FormLabel>
               <Input
