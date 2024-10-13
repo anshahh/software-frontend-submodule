@@ -81,7 +81,7 @@ export const loginUser = async (email, password) => {
     await user.reload();
 
     // Check if email is verified
-    if (user.emailVerified) {
+    if (!user.emailVerified) {
       throw new Error("Please verify your email before logging in.");
     }
 
