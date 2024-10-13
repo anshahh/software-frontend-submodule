@@ -17,11 +17,12 @@ import Examiner from './components/Examiner'
 import Student from './components/Student'
 import StudentStatus from './components/StudentStatus'
 import TwoFactorAuthentication from './components/2FactorAuth'
+import ForgotPassword from './components/ForgotPassword'
 
 function App() {
   const {adminUser,setAdminUser} = useAdminContext();
   // setAdminUser('student');
-  // setAdminUser('guide');
+  // setAdminUser('faculty');
   const user = {
     name: "Geetha V",
     status: "Admin",
@@ -33,6 +34,7 @@ function App() {
     <Routes>
       <Route path='/' element={adminUser ? <Home /> : <Navigate to= '/login'/>}></Route>
       <Route path='/2fa' element={adminUser ? <Navigate to='/' />:<TwoFactorAuthentication />}></Route>
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path='/login' element={adminUser ? <Navigate to='/' />:<Login />}></Route>
       <Route path='/signup' element={adminUser ? <Navigate to='/' />:<Signup />}></Route>
       <Route path='/btech-guide-allotment' element={adminUser ? <GuideAllocationPage /> : <Login />}></Route>

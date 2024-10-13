@@ -1,15 +1,38 @@
+// src/components/Login.jsx
+
 import { useState } from "react";
-import { Box, Button, FormControl, FormLabel, Input, Heading, Text, Stack, Alert, AlertIcon, AlertDescription, Image, ButtonGroup } from "@chakra-ui/react";
+import { 
+  Box, 
+  Button, 
+  FormControl, 
+  FormLabel, 
+  Input, 
+  Heading, 
+  Text, 
+  Stack, 
+  Alert, 
+  AlertIcon, 
+  AlertDescription, 
+  ButtonGroup 
+} from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "../report_submission/helpers/firebase"; // Corrected relative import
 import { useAdminContext } from '../context/AdminContext';
+import { Link } from "react-router-dom";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [userType, setUserType] = useState(null); // New state for user type
+  const [authError, setAuthError] = useState("");
+  const [userType, setUserType] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   let navigate = useNavigate();
-  const { adminUser, setAdminUser } = useAdminContext();
+  const { setAdminUser } = useAdminContext();
 
+  /**
+   * Validate the email format to ensure it matches @nitk.edu.in
+   */
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@nitk\.edu\.in$/;
     if (!regex.test(email)) {
@@ -20,28 +43,89 @@ export default function LoginPage() {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  /**
+   * Handle form submission for user login.
+   */
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateEmail(email)) {
-      // Proceed with login logic
-      console.log("Login attempt with:", email, userType);
-      //setAdminUser(userType); // Set user type in context
-      navigate('/2fa');
+    setAuthError("");
+
+    // Validate input fields
+    if (validateEmail(email) && userType && password) {
+      try {
+        setIsLoading(true);
+        console.log("Attempting login with:", email, userType);
+        const fetchedUserType = await loginUser(email, password);
+        
+        if (userType === fetchedUserType) {
+          setAdminUser(userType);
+          console.log("Login successful:", email, userType);
+          
+          if (userType === "faculty") {
+            navigate('/faculty-home'); // Navigate to faculty home
+          } else if (userType === "student") {
+            navigate('/student-home'); // Navigate to student home
+          }
+        } else {
+          setAuthError("User type does not match our records.");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        setAuthError(error.message); // Display the specific error message
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (!userType) {
+      setAuthError("Please select your role (Faculty/Student)");
+    } else if (!password) {
+      setAuthError("Please enter your password.");
+    }
+  };
+
+  /**
+   * Handle resending the email verification link.
+   */
+  const handleResendVerification = async () => {
+    try {
+      setIsLoading(true);
+      const user = auth.currentUser;
+      if (user && !user.emailVerified) {
+        await sendEmailVerification(user);
+        alert("Verification email resent. Please check your inbox.");
+      }
+    } catch (error) {
+      console.error("Error resending verification email:", error);
+      setAuthError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Box minH="100vh" display="flex" flexDirection="column" alignItems="center" justifyContent="center" bgGradient="linear(to-b, blue.100, purple.100)" p={4}>
+    <Box 
+      minH="100vh" 
+      display="flex" 
+      flexDirection="column" 
+      alignItems="center" 
+      justifyContent="center" 
+      bgGradient="linear(to-b, blue.100, purple.100)" 
+      p={4}
+    >
       {/* Top Container with Image */}
-      <Box w="full" maxW="md" mb={6} p={8} bg="white" shadow="md" rounded="md">
+      <Box 
+        w="full" 
+        maxW="md" 
+        mb={6} 
+        p={8} 
+        bg="white" 
+        shadow="md" 
+        rounded="md"
+      >
         <Box textAlign="center" mb={4}>
-          {/* Add an Image above the text */}
-          <Image 
-            src="src/images/nitk_logo.png" // Replace with your image path
+          <img 
+            src="src/images/nitk_logo.png" // Ensure the image is placed in public/images/
             alt="Logo"
-            boxSize="100px" // Adjust the size as needed
-            mx="auto" // Center the image horizontally
-            mb={4} // Add margin below the image
+            style={{ width: '100px', margin: '0 auto 16px' }}
           />
           <Heading size="lg" color="blue.500">Major Project Guide Allotment Software</Heading>
           <Text size="md">NITK IT Department</Text>
@@ -49,7 +133,14 @@ export default function LoginPage() {
       </Box>
 
       {/* Login Form */}
-      <Box w="full" maxW="md" p={8} bg="white" shadow="md" rounded="md">
+      <Box 
+        w="full" 
+        maxW="md" 
+        p={8} 
+        bg="white" 
+        shadow="md" 
+        rounded="md"
+      >
         <Box textAlign="center" mb={4}>
           <Heading size="md">Login</Heading>
           <Text>Enter your NITK credentials to access the Project Allocation System</Text>
@@ -79,7 +170,7 @@ export default function LoginPage() {
             </Box>
 
             <FormControl isRequired>
-              <FormLabel htmlFor="email">Email</FormLabel>
+              <FormLabel>Email</FormLabel>
               <Input
                 id="email"
                 type="email"
@@ -96,25 +187,59 @@ export default function LoginPage() {
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <Input id="password" type="password" />
+              <FormLabel>Password</FormLabel>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </FormControl>
           </Stack>
 
+          {authError && (
+            <Alert status="error" mt={4}>
+              <AlertIcon />
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Resend Verification Email Button */}
+          {authError === "Please verify your email before logging in." && (
+            <Button 
+              colorScheme="teal" 
+              w="full" 
+              mt={4} 
+              onClick={handleResendVerification}
+              isLoading={isLoading}
+            >
+              Resend Verification Email
+            </Button>
+          )}
+
           <Text mt={6} textAlign="center" fontSize="sm">
             Don't have an account?{" "}
-            <a href="/signup" style={{ color: "blue.500", textDecoration: "underline" }}>
+            <Link to="/signup" style={{ color: "blue.500", textDecoration: "underline" }}>
               Sign up
-            </a>
+            </Link>
           </Text>
 
-          <Button colorScheme="blue" w="full" mt={4} type="submit">Login</Button>
+          <Button 
+            colorScheme="blue" 
+            w="full" 
+            mt={4} 
+            type="submit" 
+            isLoading={isLoading}
+          >
+            Login
+          </Button>
         </form>
 
         <Box textAlign="center" mt={4}>
-          <a href="/forgot-password" style={{ fontSize: "sm", color: "gray.600", textDecoration: "underline" }}>
+          <Link to="/forgot-password" style={{ fontSize: "sm", color: "gray.600", textDecoration: "underline" }}>
             Forgot your password?
-          </a>
+          </Link>
         </Box>
       </Box>
     </Box>
