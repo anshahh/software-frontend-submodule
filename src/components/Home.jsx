@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChakraProvider, Box, Container, SimpleGrid, VStack, Heading, Text, Card, CardHeader, CardBody } from '@chakra-ui/react';
+import { ChakraProvider, Box, Container, SimpleGrid, VStack, Heading, Text, Card, CardHeader, CardBody, Button } from '@chakra-ui/react';
 import { extendTheme, ColorModeScript } from '@chakra-ui/react';
 import { useAdminContext } from '../context/AdminContext';
 
@@ -33,15 +33,19 @@ const user = {
   year: "2026"  
 };
 
-const facultyQuickLinks = [
-  { name: "MTech Major Project guide allotment", url: "/mtech-major-guide-allotment" },
-  { name: "MTech Minor Project guide allotment", url: "/mtech-minor-guide-allotment" },
-  { name: "Report", url: "/report" },
+// Separate button links for students and faculty
+const facultyButtons = [
+  { name: "Student Allotment", url: "/btech-guide-allotment" },
+  { name: "Grades", url: "/b/guide" },
+  { name: "Reports", url: "/report" },
 ];
 
-const studentQuickLinks = [
-  { name: "Guide Allotment", url: "/mtech-major-guide-allotment" },
-  { name: "Report Submission", url: "/report" },
+const studentButtons = [
+  { name: "B-Tech Guide Allotment", url: "/btech-guide-allotment" },
+  { name: "M-Tech Major Project Guide Allotment", url: "/mtech-major-guide-allotment" },
+  { name: "M-Tech Minor Project Guide Allotment", url: "/mtech-minor-guide-allotment" },
+  { name: "Reports", url: "/report" },
+  { name: "Grades", url: "/b/student" }
 ];
 
 const reminders = [
@@ -51,26 +55,35 @@ const reminders = [
 ];
 
 function HomePage() {
-  const { adminUser, setAdminUser } = useAdminContext();
+  const { adminUser } = useAdminContext();
 
-  // Determine quick links based on user type
-  const quickLinks = adminUser === "faculty" ? facultyQuickLinks : studentQuickLinks;
+  // Determine button links based on user type
+  const buttonLinks = adminUser === "faculty" ? facultyButtons : studentButtons;
 
   return (
     <ChakraProvider theme={customTheme}>
       <ColorModeScript initialColorMode={customTheme.config.initialColorMode} />
 
       <Box minH="100vh" bgGradient="linear(to-b, blue.100, purple.100)">
-        {/* Navbar */}
-        {/* <Navbar user={user} /> */}
-
         {/* Main Content */}
-        <Container maxW="7xl" py={6} bg="grey.100">
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
+        <Container maxW="7xl" py={6} bg="transparent">
+          <Box textAlign="center" mb={6}>
+            <Heading as="h2" size="2xl" mb={2} color="black" >
+              Details and Reminders
+            </Heading>
+            <Box h="2px" bg="teal.400" borderRadius="md" mb={2} width="60px" mx="auto" />
+          </Box>
+
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
             {/* User Details */}
-            <Card color="blue.600">
+            <Card bg="white" color="gray.900">
               <CardHeader>
-                <Heading size="md">Profile</Heading>
+                <Box textAlign="center">
+                  <Heading size="lg" color="gray.900" >
+                    Profile
+                  </Heading>
+                  <Box h="1px" bg="teal.400" borderRadius="md" mb={2} width="40px" mx="auto" />
+                </Box>
               </CardHeader>
               <CardBody>
                 <VStack align="stretch" spacing={2}>
@@ -83,9 +96,14 @@ function HomePage() {
             </Card>
 
             {/* Reminders */}
-            <Card color="blue.600">
+            <Card bg="white" color="gray.900">
               <CardHeader>
-                <Heading size="md">Reminders</Heading>
+                <Box textAlign="center">
+                  <Heading size="lg" color="gray.900">
+                    Reminders
+                  </Heading>
+                  <Box h="1px" bg="teal.400" borderRadius="md" mb={2} width="40px" mx="auto" />
+                </Box>
               </CardHeader>
               <CardBody>
                 <VStack align="stretch" spacing={2}>
@@ -95,21 +113,33 @@ function HomePage() {
                 </VStack>
               </CardBody>
             </Card>
-
-            {/* Quick Links */}
-            <Card color="blue.600">
-              <CardHeader>
-                <Heading size="md">Quick Links</Heading>
-              </CardHeader>
-              <CardBody>
-                <VStack align="stretch" spacing={2}>
-                  {quickLinks.map((link, index) => (
-                    <a key={index} href={link.url} className='underline'>{link.name}</a>
-                  ))}
-                </VStack>
-              </CardBody>
-            </Card>
           </SimpleGrid>
+
+          {/* Buttons Section */}
+          <Box mt={8}>
+            <Box textAlign="center" mb={4}>
+              <Heading as="h2" size="2xl" mb={2} color="black" >
+                Links
+              </Heading>
+              <Box h="2px" bg="teal.400" borderRadius="md" mb={2} width="60px" mx="auto" />
+            </Box>
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4} justifyItems="center">
+              {buttonLinks.map((button, index) => (
+                <Button
+                  key={index}
+                  as="a"
+                  href={button.url}
+                  colorScheme="teal"
+                  size="lg"
+                  fontSize="lg"
+                  variant="solid"
+                  width="100%" // Make buttons full-width within the grid cell
+                >
+                  {button.name}
+                </Button>
+              ))}
+            </SimpleGrid>
+          </Box>
         </Container>
       </Box>
     </ChakraProvider>
