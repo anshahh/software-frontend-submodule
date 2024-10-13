@@ -1,7 +1,22 @@
+// src/components/Login.jsx
+
 import { useState } from "react";
-import { Box, Button, FormControl, FormLabel, Input, Heading, Text, Stack, Alert, AlertIcon, AlertDescription, Image, ButtonGroup } from "@chakra-ui/react";
+import { 
+  Box, 
+  Button, 
+  FormControl, 
+  FormLabel, 
+  Input, 
+  Heading, 
+  Text, 
+  Stack, 
+  Alert, 
+  AlertIcon, 
+  AlertDescription, 
+  ButtonGroup 
+} from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "/home/sricharan12/software-frontend-submodule/src/report_submission/helpers/firebase.js";
+import { loginUser } from "../report_submission/helpers/firebase"; // Corrected relative import
 import { useAdminContext } from '../context/AdminContext';
 import { Link } from "react-router-dom";
 
@@ -15,6 +30,9 @@ export default function LoginPage() {
   let navigate = useNavigate();
   const { setAdminUser } = useAdminContext();
 
+  /**
+   * Validate the email format to ensure it matches @nitk.edu.in
+   */
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@nitk\.edu\.in$/;
     if (!regex.test(email)) {
@@ -25,9 +43,14 @@ export default function LoginPage() {
     return true;
   };
 
+  /**
+   * Handle form submission for user login.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAuthError("");
+
+    // Validate input fields
     if (validateEmail(email) && userType && password) {
       try {
         setIsLoading(true);
@@ -39,20 +62,16 @@ export default function LoginPage() {
           console.log("Login successful:", email, userType);
           
           if (userType === "faculty") {
-            navigate('/'); 
+            navigate('/faculty-home'); // Navigate to faculty home
           } else if (userType === "student") {
-            navigate('/'); 
+            navigate('/student-home'); // Navigate to student home
           }
         } else {
           setAuthError("User type does not match our records.");
         }
       } catch (error) {
         console.error("Login error:", error);
-        if (error.code === 'auth/configuration-not-found') {
-          setAuthError("Firebase configuration error. Please contact support.");
-        } else {
-          setAuthError(`Authentication error: ${error.message}`);
-        }
+        setAuthError(error.message); // Display the specific error message
       } finally {
         setIsLoading(false);
       }
@@ -63,17 +82,50 @@ export default function LoginPage() {
     }
   };
 
+  /**
+   * Handle resending the email verification link.
+   */
+  const handleResendVerification = async () => {
+    try {
+      setIsLoading(true);
+      const user = auth.currentUser;
+      if (user && !user.emailVerified) {
+        await sendEmailVerification(user);
+        alert("Verification email resent. Please check your inbox.");
+      }
+    } catch (error) {
+      console.error("Error resending verification email:", error);
+      setAuthError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Box minH="100vh" display="flex" flexDirection="column" alignItems="center" justifyContent="center" bgGradient="linear(to-b, blue.100, purple.100)" p={4}>
+    <Box 
+      minH="100vh" 
+      display="flex" 
+      flexDirection="column" 
+      alignItems="center" 
+      justifyContent="center" 
+      bgGradient="linear(to-b, blue.100, purple.100)" 
+      p={4}
+    >
       {/* Top Container with Image */}
-      <Box w="full" maxW="md" mb={6} p={8} bg="white" shadow="md" rounded="md">
+      <Box 
+        w="full" 
+        maxW="md" 
+        mb={6} 
+        p={8} 
+        bg="white" 
+        shadow="md" 
+        rounded="md"
+      >
         <Box textAlign="center" mb={4}>
-          <Image 
-            src="src/images/nitk_logo.png"
+          <img 
+            src="src/images/nitk_logo.png" // Ensure the image is placed in public/images/
             alt="Logo"
-            boxSize="100px"
-            mx="auto"
-            mb={4}
+            style={{ width: '100px', margin: '0 auto 16px' }}
           />
           <Heading size="lg" color="blue.500">Major Project Guide Allotment Software</Heading>
           <Text size="md">NITK IT Department</Text>
@@ -81,7 +133,14 @@ export default function LoginPage() {
       </Box>
 
       {/* Login Form */}
-      <Box w="full" maxW="md" p={8} bg="white" shadow="md" rounded="md">
+      <Box 
+        w="full" 
+        maxW="md" 
+        p={8} 
+        bg="white" 
+        shadow="md" 
+        rounded="md"
+      >
         <Box textAlign="center" mb={4}>
           <Heading size="md">Login</Heading>
           <Text>Enter your NITK credentials to access the Project Allocation System</Text>
@@ -146,6 +205,19 @@ export default function LoginPage() {
             </Alert>
           )}
 
+          {/* Resend Verification Email Button */}
+          {authError === "Please verify your email before logging in." && (
+            <Button 
+              colorScheme="teal" 
+              w="full" 
+              mt={4} 
+              onClick={handleResendVerification}
+              isLoading={isLoading}
+            >
+              Resend Verification Email
+            </Button>
+          )}
+
           <Text mt={6} textAlign="center" fontSize="sm">
             Don't have an account?{" "}
             <Link to="/signup" style={{ color: "blue.500", textDecoration: "underline" }}>
@@ -153,15 +225,21 @@ export default function LoginPage() {
             </Link>
           </Text>
 
-          <Button colorScheme="blue" w="full" mt={4} type="submit" isLoading={isLoading}>
+          <Button 
+            colorScheme="blue" 
+            w="full" 
+            mt={4} 
+            type="submit" 
+            isLoading={isLoading}
+          >
             Login
           </Button>
         </form>
 
         <Box textAlign="center" mt={4}>
-          <a href="/forgot-password" style={{ fontSize: "sm", color: "gray.600", textDecoration: "underline" }}>
+          <Link to="/forgot-password" style={{ fontSize: "sm", color: "gray.600", textDecoration: "underline" }}>
             Forgot your password?
-          </a>
+          </Link>
         </Box>
       </Box>
     </Box>
