@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { Box, Button, FormControl, FormLabel, Input, Heading, Text, Stack, Alert, AlertIcon, AlertDescription, Image, ButtonGroup } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { loginUser } from "/home/sricharan12/software-frontend-submodule/src/report_submission/helpers/firebase.js";
 import { useAdminContext } from '../context/AdminContext';
+import { Link } from "react-router-dom";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
-  const [userType, setUserType] = useState(null); // New state for user type
+  const [authError, setAuthError] = useState("");
+  const [userType, setUserType] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   let navigate = useNavigate();
-  const { adminUser, setAdminUser } = useAdminContext();
+  const { setAdminUser } = useAdminContext();
 
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@nitk\.edu\.in$/;
@@ -20,13 +25,41 @@ export default function LoginPage() {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateEmail(email)) {
-      // Proceed with login logic
-      console.log("Login attempt with:", email, userType);
-      //setAdminUser(userType); // Set user type in context
-      navigate('/2fa');
+    setAuthError("");
+    if (validateEmail(email) && userType && password) {
+      try {
+        setIsLoading(true);
+        console.log("Attempting login with:", email, userType);
+        const fetchedUserType = await loginUser(email, password);
+        
+        if (userType === fetchedUserType) {
+          setAdminUser(userType);
+          console.log("Login successful:", email, userType);
+          
+          if (userType === "faculty") {
+            navigate('/'); 
+          } else if (userType === "student") {
+            navigate('/'); 
+          }
+        } else {
+          setAuthError("User type does not match our records.");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        if (error.code === 'auth/configuration-not-found') {
+          setAuthError("Firebase configuration error. Please contact support.");
+        } else {
+          setAuthError(`Authentication error: ${error.message}`);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else if (!userType) {
+      setAuthError("Please select your role (Faculty/Student)");
+    } else if (!password) {
+      setAuthError("Please enter your password.");
     }
   };
 
@@ -35,13 +68,12 @@ export default function LoginPage() {
       {/* Top Container with Image */}
       <Box w="full" maxW="md" mb={6} p={8} bg="white" shadow="md" rounded="md">
         <Box textAlign="center" mb={4}>
-          {/* Add an Image above the text */}
           <Image 
-            src="src/images/nitk_logo.png" // Replace with your image path
+            src="src/images/nitk_logo.png"
             alt="Logo"
-            boxSize="100px" // Adjust the size as needed
-            mx="auto" // Center the image horizontally
-            mb={4} // Add margin below the image
+            boxSize="100px"
+            mx="auto"
+            mb={4}
           />
           <Heading size="lg" color="blue.500">Major Project Guide Allotment Software</Heading>
           <Text size="md">NITK IT Department</Text>
@@ -79,7 +111,7 @@ export default function LoginPage() {
             </Box>
 
             <FormControl isRequired>
-              <FormLabel htmlFor="email">Email</FormLabel>
+              <FormLabel>Email</FormLabel>
               <Input
                 id="email"
                 type="email"
@@ -96,19 +128,34 @@ export default function LoginPage() {
             </FormControl>
 
             <FormControl isRequired>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <Input id="password" type="password" />
+              <FormLabel>Password</FormLabel>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </FormControl>
           </Stack>
 
+          {authError && (
+            <Alert status="error" mt={4}>
+              <AlertIcon />
+              <AlertDescription>{authError}</AlertDescription>
+            </Alert>
+          )}
+
           <Text mt={6} textAlign="center" fontSize="sm">
             Don't have an account?{" "}
-            <a href="/signup" style={{ color: "blue.500", textDecoration: "underline" }}>
+            <Link to="/signup" style={{ color: "blue.500", textDecoration: "underline" }}>
               Sign up
-            </a>
+            </Link>
           </Text>
 
-          <Button colorScheme="blue" w="full" mt={4} type="submit">Login</Button>
+          <Button colorScheme="blue" w="full" mt={4} type="submit" isLoading={isLoading}>
+            Login
+          </Button>
         </form>
 
         <Box textAlign="center" mt={4}>
