@@ -21,7 +21,7 @@ import TwoFactorAuthentication from './components/2FactorAuth'
 function App() {
   const {adminUser,setAdminUser} = useAdminContext();
   // setAdminUser('student');
-  // setAdminUser('guide');
+  // setAdminUser('faculty');
   const user = {
     name: "Geetha V",
     status: "Admin",

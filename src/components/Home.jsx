@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChakraProvider, Box, Container, SimpleGrid, VStack, Heading, Text, Card, CardHeader, CardBody } from '@chakra-ui/react';
 import { extendTheme, ColorModeScript } from '@chakra-ui/react';
-//import Navbar from './Navbar';  // Import the Navbar component
 import { useAdminContext } from '../context/AdminContext';
 
 // 1. Extend the Chakra theme to set up a dark mode
@@ -34,20 +33,29 @@ const user = {
   year: "2026"  
 };
 
-const reminders = [
-  "Submit project report by Friday",
-  "Attend seminar on AI at 2 PM tomorrow",
-  "Register for the upcoming hackathon"
-];
-
-const quickLinks = [
+const facultyQuickLinks = [
   { name: "MTech Major Project guide allotment", url: "/mtech-major-guide-allotment" },
   { name: "MTech Minor Project guide allotment", url: "/mtech-minor-guide-allotment" },
   { name: "Report", url: "/report" },
 ];
 
+const studentQuickLinks = [
+  { name: "Guide Allotment", url: "/mtech-major-guide-allotment" },
+  { name: "Report Submission", url: "/report" },
+];
+
+const reminders = [
+  "Submit Project Design by 1st November 2024",
+  "Design Pattern - Seminar at 2 pm",
+  "Guide Allotments have been completed"
+];
+
 function HomePage() {
-  const {adminUser,setAdminUser} = useAdminContext();
+  const { adminUser, setAdminUser } = useAdminContext();
+
+  // Determine quick links based on user type
+  const quickLinks = adminUser === "faculty" ? facultyQuickLinks : studentQuickLinks;
+
   return (
     <ChakraProvider theme={customTheme}>
       <ColorModeScript initialColorMode={customTheme.config.initialColorMode} />
